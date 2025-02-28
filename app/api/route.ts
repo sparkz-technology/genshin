@@ -5,7 +5,7 @@ export async function GET() {
   try {
     processCodes()
     return NextResponse.json({ status: 200, message: "Processing codes..." });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
