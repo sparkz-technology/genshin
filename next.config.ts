@@ -37,7 +37,6 @@ const nextConfig: NextConfig = {
     return process.env.VERCEL_GIT_COMMIT_SHA || Date.now().toString()
   },
     experimental: {
-    reactCompiler: true,
     nextScriptWorkers: true, 
     },
   distDir: "build",
