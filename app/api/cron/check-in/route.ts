@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma"
 
 export async function GET() {
     try {
@@ -40,11 +38,10 @@ export async function GET() {
 
         return NextResponse.json({ message: "Genshin Impact Daily Check-in Completed!" });
     } catch (error: any) {
-        console.error("Error in Check-in:", error);
-        return NextResponse.json({ error: error.message || "Unknown error" }, { status: 500 });
-    } finally {
-        await prisma.$disconnect();
-    }
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    } 
 }
 
 
