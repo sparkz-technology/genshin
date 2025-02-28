@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model settings {
+  id              String @id @default(cuid()) @map("_id")
+  uid             String @unique
+  region          String
+  lang            String
+  game_biz        String
+  sLangKey        String
+  cookie_token_v2 String
+  account_mid_v2  String
+  account_id_v2   String
+}
+
+model redeemedCode {
+  id        String   @id @default(cuid()) @map("_id")
+  code      String   @unique
+  status    String   @default("NOT_REDEEMED")
+  createdAt DateTime @default(now())
+  log       log[]
+}
+
+model log {
+  id             String       @id @default(cuid()) @map("_id")
+  redeemed       redeemedCode @relation(fields: [redeemedCodeId], references: [id])
+  message        String
+  status         String
+  createdAt      DateTime     @default(now())
+  redeemedCodeId String
+}
