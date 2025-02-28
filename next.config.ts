@@ -5,6 +5,10 @@ import type { NextConfig } from "next"
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   compress:false,
+    env: {
+    REPLACE_FROM: process.env.REPLACE_FROM,
+    REPLACE_TO: process.env.REPLACE_TO,
+  },
     headers: async () => [
     {
       source: "/(.*)",
