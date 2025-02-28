@@ -23,6 +23,8 @@ model settings {
   cookie_token_v2 String
   account_mid_v2  String
   account_id_v2   String
+  ltuid_v2        String
+  ltoken_v2       String
 }
 
 model redeemedCode {
