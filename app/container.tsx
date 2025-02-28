@@ -32,6 +32,8 @@ interface GenshinRedeemContainerProps {
       cookie_token_v2: string;
       account_mid_v2: string;
       account_id_v2: string;
+      ltoken_v2:string;
+      ltuid_v2:string;
     };
   };
 }
@@ -43,6 +45,8 @@ export default function GenshinRedeemContainer({ data }: GenshinRedeemContainerP
     enableReinitialize: true,
     initialValues: {
       ...data.settings,
+      ltoken_v2 data.settings.ltoken_v2,
+      ltuid_v2: data.settings.ltuid_v2,
       game_biz: data.settings.game_biz,
       account_mid_v2: data.settings.account_mid_v2,
       account_id_v2: data.settings.account_id_v2,
@@ -50,6 +54,8 @@ export default function GenshinRedeemContainer({ data }: GenshinRedeemContainerP
     },
 
     validationSchema: Yup.object({
+      ltoken_v2: Yup.string().required("Required"),
+      ltuid_v2: Yup.string().required("Required"),
       game_biz: Yup.string().required("Required"),
       cookie_token_v2: Yup.string().required("Cookie token is required"),
       account_mid_v2: Yup.string().required("Account MID is required"),
@@ -136,6 +142,34 @@ export default function GenshinRedeemContainer({ data }: GenshinRedeemContainerP
             </CardHeader>
             <CardContent>
               <form onSubmit={formik.handleSubmit} className="space-y-4">
+                   <div className="space-y-2">
+                  <Label htmlFor="ltoken_v2">Game Business</Label>
+                  <Input
+                    id="ltoken_v2"
+                    name="ltoken_v2"
+                    value={formik.values.ltoken_v2}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    disabled={!canUpdate}
+                  />
+                  {formik.touched.ltoken_v2 && formik.errors.ltoken_v2 ? (
+                    <div className="text-sm text-red-500">{formik.errors.ltoken_v2}</div>
+                  ) : null}
+                </div>
+                   <div className="space-y-2">
+                  <Label htmlFor="ltuid_v2">Game Business</Label>
+                  <Input
+                    id="ltuid_v2"
+                    name="ltuid_v2"
+                    value={formik.values.ltuid_v2}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    disabled={!canUpdate}
+                  />
+                  {formik.touched.ltuid_v2 && formik.errors.ltuid_v2 ? (
+                    <div className="text-sm text-red-500">{formik.errors.ltuid_v2}</div>
+                  ) : null}
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="game_biz">Game Business</Label>
                   <Input
