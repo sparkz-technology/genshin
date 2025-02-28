@@ -144,7 +144,7 @@ export default function GenshinRedeemContainer({ data }: GenshinRedeemContainerP
               <form onSubmit={formik.handleSubmit} className="space-y-4">
                    <div className="space-y-2">
                   <Label htmlFor="ltoken_v2">Game Business</Label>
-                  <Input
+                  <Textarea
                     id="ltoken_v2"
                     name="ltoken_v2"
                     value={formik.values.ltoken_v2}
