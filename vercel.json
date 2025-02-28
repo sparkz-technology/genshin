@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/cron/check-in",
-      "schedule": "30 16 * * *"
+      "schedule": "0 5 * * *"
     },
     {
       "path": "/api/cron/redeem-code",
