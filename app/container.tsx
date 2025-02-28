@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/app/data-table";
 import { columns } from "@/app/columns";
@@ -152,7 +153,7 @@ export default function GenshinRedeemContainer({ data }: GenshinRedeemContainerP
 
                 <div className="space-y-2">
                   <Label htmlFor="cookie_token_v2">Cookie Token</Label>
-                  <Input
+                  <Textarea
                     id="cookie_token_v2"
                     name="cookie_token_v2"
                     value={formik.values.cookie_token_v2}
