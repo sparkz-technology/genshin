@@ -108,6 +108,7 @@ export const updateSettings = async (setting: {
   game_biz: string;
   ltuid_v2:string;
   ltoken_v2:string;
+  act_id:string;
 }) => {
   try {
     await prisma.settings.upsert({
@@ -119,6 +120,7 @@ export const updateSettings = async (setting: {
         account_mid_v2: setting.account_mid_v2,
         account_id_v2: setting.account_id_v2,
         game_biz: setting.game_biz,
+        act_id: setting.act_id,
       },
       create: {
         uid: setting.uid,
@@ -128,6 +130,7 @@ export const updateSettings = async (setting: {
         sLangKey: "en-us",
         ltuid_v2:setting.ltuid_v2,
         ltoken_v2:setting.ltoken_v2,
+        act_id: setting.act_id,
         cookie_token_v2: setting.cookie_token_v2,
         account_mid_v2: setting.account_mid_v2,
         account_id_v2: setting.account_id_v2,
