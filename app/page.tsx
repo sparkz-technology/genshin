@@ -1,4 +1,3 @@
-"use server";
 
 import { getScreenData } from "@/lib/action";
 import GenshinRedeemContainer from "./container";
