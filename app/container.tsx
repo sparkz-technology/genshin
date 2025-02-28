@@ -45,7 +45,7 @@ export default function GenshinRedeemContainer({ data }: GenshinRedeemContainerP
     enableReinitialize: true,
     initialValues: {
       ...data.settings,
-      ltoken_v2 data.settings.ltoken_v2,
+      ltoken_v2: data.settings.ltoken_v2,
       ltuid_v2: data.settings.ltuid_v2,
       game_biz: data.settings.game_biz,
       account_mid_v2: data.settings.account_mid_v2,
