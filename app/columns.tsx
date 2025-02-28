@@ -26,7 +26,7 @@ export const REDEEMED_COLUMNS: ColumnDef<LogEntry>[] = [
       return (
         <Badge
           className="text-[10px] py-0 px-1.5"
-          variant={status === "success" ? "default" : status === "error" ? "destructive" : "outline"}
+          variant={status === "SUCCESS" ? "default" : status === "FAILED" ? "destructive" : "outline"}
         >
           {status}
         </Badge>
@@ -82,7 +82,7 @@ export const DAILY_CHECK_IN_COLUMNS: ColumnDef<LogEntry>[] = [
       return (
         <Badge
           className="text-[10px] py-0 px-1.5"
-          variant={status === "success" ? "default" : status === "error" ? "destructive" : "outline"}
+          variant={status === "SUCCESS" ? "default" : status === "FAILED" ? "destructive" : "outline"}
         >
           {status}
         </Badge>
