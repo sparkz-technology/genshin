@@ -24,7 +24,7 @@ async function fetchActiveCodes(): Promise<string[]> {
     );
 
     return uniqueCodes;
-  } catch (error) {
+  } catch {
     return [];
   }
 }
@@ -122,7 +122,7 @@ export const updateSettings = async (setting: {
     });
     revalidatePath("/");
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 };
@@ -136,7 +136,7 @@ export const getSettings = async () => {
     }
 
     return settings;
-  } catch (error) {
+  } catch  {
     return null;
   }
 };
@@ -162,7 +162,7 @@ export const getLogs = async () => {
     }));
 
     return formattedLogs;
-  } catch (error) {
+  } catch  {
     return [];
   }
 };
