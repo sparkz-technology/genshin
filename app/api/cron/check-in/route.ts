@@ -37,7 +37,7 @@ export async function GET() {
         }
 
         return NextResponse.json({ message: "Genshin Impact Daily Check-in Completed!" });
-    } catch (error: any) {
+    } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     
     return NextResponse.json({ error: errorMessage }, { status: 500 });
