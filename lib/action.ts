@@ -188,7 +188,9 @@ export const getLogs = async () => {
       .filter((log) => log.type !== "DAILY_CHECK_IN")
       .map((log) => ({
         id: log.id,
-        message: log.message,
+        message: log.message?.replace(
+          process.env.REPLACE_FROM || "", 
+          process.env.REPLACE_TO || "" ),
         status: log.status,
         createdAt: log.createdAt,
         code: log.redeemed?.code || "",
@@ -198,7 +200,9 @@ export const getLogs = async () => {
       .filter((log) => log.type == "DAILY_CHECK_IN")
       .map((log) => ({
         id: log.id,
-        message: log.message,
+       message: log.message?.replace(
+          process.env.REPLACE_FROM || "", 
+          process.env.REPLACE_TO || "" ),
         status: log.status,
         createdAt: log.createdAt,
         code: log.redeemed?.code || "",
