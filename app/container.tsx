@@ -34,6 +34,7 @@ interface GenshinRedeemContainerProps {
       account_id_v2: string;
       ltoken_v2:string;
       ltuid_v2:string;
+      act_id: string;
     };
   };
 }
@@ -45,6 +46,7 @@ export default function GenshinRedeemContainer({ data }: GenshinRedeemContainerP
     enableReinitialize: true,
     initialValues: {
       ...data.settings,
+      act_id:data.settings.act_id,
       ltoken_v2: data.settings.ltoken_v2,
       ltuid_v2: data.settings.ltuid_v2,
       game_biz: data.settings.game_biz,
@@ -54,6 +56,7 @@ export default function GenshinRedeemContainer({ data }: GenshinRedeemContainerP
     },
 
     validationSchema: Yup.object({
+      act_id: Yup.string().required("Required"),
       ltoken_v2: Yup.string().required("Required"),
       ltuid_v2: Yup.string().required("Required"),
       game_biz: Yup.string().required("Required"),
@@ -142,6 +145,19 @@ export default function GenshinRedeemContainer({ data }: GenshinRedeemContainerP
             </CardHeader>
             <CardContent>
               <form onSubmit={formik.handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                  <Label htmlFor="act_id">Game Business</Label>
+                  <Textarea
+                    id="act_id"
+                    name="act_id"
+                    value={formik.values.act_id}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    disabled={!canUpdate}
+                  />
+                  {formik.touched.act_id && formik.errors.act_id ? (
+                    <div className="text-sm text-red-500">{formik.errors.act_id}</div>
+                  ) : null}
                    <div className="space-y-2">
                   <Label htmlFor="ltoken_v2">Game Business</Label>
                   <Textarea
