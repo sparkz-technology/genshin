@@ -191,6 +191,7 @@ export const getLogs = async () => {
         message: log.message,
         status: log.status,
         createdAt: log.createdAt,
+        code: log.redeemed?.code || "",
       }));
 
     const dailyCheckInLogs: LogEntry[] = logs
