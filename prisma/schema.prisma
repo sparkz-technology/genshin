@@ -25,6 +25,7 @@ model settings {
   account_id_v2   String
   ltuid_v2        String
   ltoken_v2       String
+  act_id          String
 }
 
 model redeemedCode {
@@ -36,10 +37,11 @@ model redeemedCode {
 }
 
 model log {
-  id             String       @id @default(cuid()) @map("_id")
-  redeemed       redeemedCode @relation(fields: [redeemedCodeId], references: [id])
+  id             String        @id @default(cuid()) @map("_id")
+  type           String        @default("REDEEMED")
+  redeemed       redeemedCode? @relation(fields: [redeemedCodeId], references: [id])
   message        String
   status         String
-  createdAt      DateTime     @default(now())
-  redeemedCodeId String
+  createdAt      DateTime      @default(now())
+  redeemedCodeId String?
 }

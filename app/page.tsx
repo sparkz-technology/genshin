@@ -8,17 +8,5 @@ export default async function GenshinRedeemPage() {
   if (!data || !data.settings) {
     return <div>Error: Settings not found</div>;
   }
-  const defaultSettings = {
-    id: "",
-    uid: "",
-    region: "",
-    lang: "en",
-    game_biz: "",
-    sLangKey: "",
-    cookie_token_v2: "",
-    account_mid_v2: "",
-    account_id_v2: "",
-  };
-  
-  return <GenshinRedeemContainer data={{ ...data, settings: data.settings ?? defaultSettings }} />
+  return <GenshinRedeemContainer data={{ ...data }} />
 }

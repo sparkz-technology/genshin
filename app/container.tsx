@@ -1,27 +1,26 @@
 "use client";
 
-import { useFormik } from "formik";
-import * as Yup from "yup";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/app/data-table";
-import { columns } from "@/app/columns";
 import { ThemeToggle } from "@/app/theme-toggle";
 import type { LogEntry } from "./types.js";
 import { toast, Toaster } from "sonner";
 import { useTheme } from "next-themes";
-import { processCodes, updateSettings } from "@/lib/action";
+import { processCodes } from "@/lib/action";
 import { GitPullRequestCreate } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useEffect, useState } from "react";
+import { DAILY_CHECK_IN_COLUMNS, REDEEMED_COLUMNS } from "./columns";
+import SettingsDialog from "./settings-dialog";
 
 interface GenshinRedeemContainerProps {
   data: {
-    logs: LogEntry[];
+    logs: {
+      redeemLogs: LogEntry[];
+      dailyCheckInLogs: LogEntry[];
+    };
     settings: {
       id: string;
       uid: string;
@@ -32,8 +31,8 @@ interface GenshinRedeemContainerProps {
       cookie_token_v2: string;
       account_mid_v2: string;
       account_id_v2: string;
-      ltoken_v2:string;
-      ltuid_v2:string;
+      ltoken_v2: string;
+      ltuid_v2: string;
       act_id: string;
     };
   };
@@ -42,44 +41,6 @@ interface GenshinRedeemContainerProps {
 export default function GenshinRedeemContainer({ data }: GenshinRedeemContainerProps) {
   const { theme } = useTheme();
 
-  const formik = useFormik({
-    enableReinitialize: true,
-    initialValues: {
-      ...data.settings,
-      act_id:data.settings.act_id,
-      ltoken_v2: data.settings.ltoken_v2,
-      ltuid_v2: data.settings.ltuid_v2,
-      game_biz: data.settings.game_biz,
-      account_mid_v2: data.settings.account_mid_v2,
-      account_id_v2: data.settings.account_id_v2,
-      cookie_token_v2: data.settings.cookie_token_v2,
-    },
-
-    validationSchema: Yup.object({
-      act_id: Yup.string().required("Required"),
-      ltoken_v2: Yup.string().required("Required"),
-      ltuid_v2: Yup.string().required("Required"),
-      game_biz: Yup.string().required("Required"),
-      cookie_token_v2: Yup.string().required("Cookie token is required"),
-      account_mid_v2: Yup.string().required("Account MID is required"),
-      account_id_v2: Yup.string().required("Account ID is required"),
-    }),
-    onSubmit: async (values, { resetForm }) => {
-      const { uid, ...rest } = values;
-      const success = await updateSettings({ uid: uid || "", ...rest });
-
-      if (success) {
-        toast.message("Settings Saved!", {
-          description: "Your account settings have been updated successfully.",
-        });
-        resetForm();
-      } else {
-        toast.message("Save Failed", {
-          description: "Unable to save settings. Please try again.",
-        });
-      }
-    },
-  });
   const [canUpdate, setCanUpdate] = useState(false);
   let lastTap = 0; // For double tap detection
 
@@ -109,7 +70,7 @@ export default function GenshinRedeemContainer({ data }: GenshinRedeemContainerP
       description: "Redeem process has been triggered.",
     });
   };
-
+console.log(data);
   return (
     <div className="container mx-auto py-10">
       <div className="flex justify-between items-center mb-8">
@@ -124,7 +85,6 @@ export default function GenshinRedeemContainer({ data }: GenshinRedeemContainerP
         </motion.h1>
         <div className="flex space-x-4">
           <ThemeToggle />
-
           <Tooltip delayDuration={200}>
             <TooltipTrigger asChild>
               <Button variant="outline" size="icon" onClick={handleTriggerRedeem} disabled={!canUpdate}>
@@ -133,11 +93,12 @@ export default function GenshinRedeemContainer({ data }: GenshinRedeemContainerP
             </TooltipTrigger>
             <TooltipContent>Trigger</TooltipContent>
           </Tooltip>
+          <SettingsDialog data={data.settings} disabled={!canUpdate} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        {/* <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <Card>
             <CardHeader>
               <CardTitle>Settings</CardTitle>
@@ -145,9 +106,9 @@ export default function GenshinRedeemContainer({ data }: GenshinRedeemContainerP
             </CardHeader>
             <CardContent>
               <form onSubmit={formik.handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                  <Label htmlFor="act_id">Game Business</Label>
-                  <Textarea
+                <div className="space-y-2">
+                  <Label htmlFor="act_id">Act Id</Label>
+                  <Input
                     id="act_id"
                     name="act_id"
                     value={formik.values.act_id}
@@ -158,8 +119,9 @@ export default function GenshinRedeemContainer({ data }: GenshinRedeemContainerP
                   {formik.touched.act_id && formik.errors.act_id ? (
                     <div className="text-sm text-red-500">{formik.errors.act_id}</div>
                   ) : null}
-                   <div className="space-y-2">
-                  <Label htmlFor="ltoken_v2">Game Business</Label>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="ltoken_v2">Token</Label>
                   <Textarea
                     id="ltoken_v2"
                     name="ltoken_v2"
@@ -172,8 +134,8 @@ export default function GenshinRedeemContainer({ data }: GenshinRedeemContainerP
                     <div className="text-sm text-red-500">{formik.errors.ltoken_v2}</div>
                   ) : null}
                 </div>
-                   <div className="space-y-2">
-                  <Label htmlFor="ltuid_v2">Game Business</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="ltuid_v2">UID</Label>
                   <Input
                     id="ltuid_v2"
                     name="ltuid_v2"
@@ -252,14 +214,23 @@ export default function GenshinRedeemContainer({ data }: GenshinRedeemContainerP
               </form>
             </CardContent>
           </Card>
-        </motion.div>
+        </motion.div> */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Daily Check-In History</CardTitle>
+            <CardDescription>History of your daily check-ins</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DataTable columns={DAILY_CHECK_IN_COLUMNS} data={data.logs?.dailyCheckInLogs} />
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader>
             <CardTitle>Redemption History</CardTitle>
             <CardDescription>History of your redemption attempts</CardDescription>
           </CardHeader>
           <CardContent>
-            <DataTable columns={columns} data={data.logs} />
+            <DataTable columns={REDEEMED_COLUMNS} data={data.logs?.redeemLogs} />
           </CardContent>
         </Card>
       </div>

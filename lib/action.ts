@@ -63,14 +63,15 @@ async function redeemCode(cdkey: string): Promise<boolean> {
     const response = await fetch(`${baseUrl}?${queryParams.toString()}`, {
       headers: {
         Cookie: cookies,
-         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
-          "Accept-Language": "en-US,en;q=0.9",
-          "Referer": "https://webstatic-sea.hoyoverse.com/",
-          "Origin": "https://webstatic-sea.hoyoverse.com",
-          "Connection": "keep-alive",
-          "DNT": "1",
-          "Upgrade-Insecure-Requests": "1"
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+        Referer: "https://webstatic-sea.hoyoverse.com/",
+        Origin: "https://webstatic-sea.hoyoverse.com",
+        Connection: "keep-alive",
+        DNT: "1",
+        "Upgrade-Insecure-Requests": "1",
       },
     });
 
@@ -106,16 +107,16 @@ export const updateSettings = async (setting: {
   account_mid_v2: string;
   account_id_v2: string;
   game_biz: string;
-  ltuid_v2:string;
-  ltoken_v2:string;
-  act_id:string;
+  ltuid_v2: string;
+  ltoken_v2: string;
+  act_id: string;
 }) => {
   try {
     await prisma.settings.upsert({
       where: { uid: setting.uid },
       update: {
-        ltuid_v2:setting.ltuid_v2,
-        ltoken_v2:setting.ltoken_v2,
+        ltuid_v2: setting.ltuid_v2,
+        ltoken_v2: setting.ltoken_v2,
         cookie_token_v2: setting.cookie_token_v2,
         account_mid_v2: setting.account_mid_v2,
         account_id_v2: setting.account_id_v2,
@@ -128,8 +129,8 @@ export const updateSettings = async (setting: {
         lang: "en",
         game_biz: setting.game_biz,
         sLangKey: "en-us",
-        ltuid_v2:setting.ltuid_v2,
-        ltoken_v2:setting.ltoken_v2,
+        ltuid_v2: setting.ltuid_v2,
+        ltoken_v2: setting.ltoken_v2,
         act_id: setting.act_id,
         cookie_token_v2: setting.cookie_token_v2,
         account_mid_v2: setting.account_mid_v2,
@@ -142,18 +143,31 @@ export const updateSettings = async (setting: {
     return false;
   }
 };
-
+const defaultSettings = {
+  id: "",
+  uid: "",
+  region: "",
+  lang: "en",
+  game_biz: "",
+  sLangKey: "",
+  cookie_token_v2: "",
+  account_mid_v2: "",
+  account_id_v2: "",
+  ltoken_v2: "",
+  ltuid_v2: "",
+  act_id: "",
+};
 export const getSettings = async () => {
   try {
     const settings = await prisma.settings.findFirst();
 
     if (!settings) {
-      return null;
+      return defaultSettings;
     }
 
     return settings;
-  } catch  {
-    return null;
+  } catch {
+    return defaultSettings;
   }
 };
 
@@ -166,20 +180,32 @@ export const getLogs = async () => {
         message: true,
         status: true,
         createdAt: true,
+        type: true,
         redeemed: { select: { code: true } },
       },
     });
-    const formattedLogs: LogEntry[] = logs.map((log) => ({
-      id: log.id,
-      message: log.message,
-      status: log.status,
-      createdAt: log.createdAt,
-      code: log.redeemed?.code || "", // Handle missing `redeemed`
-    }));
+    const redeemLogs: LogEntry[] = logs
+      .filter((log) => log.type !== "DAILY_CHECK_IN")
+      .map((log) => ({
+        id: log.id,
+        message: log.message,
+        status: log.status,
+        createdAt: log.createdAt,
+      }));
 
-    return formattedLogs;
-  } catch  {
-    return [];
+    const dailyCheckInLogs: LogEntry[] = logs
+      .filter((log) => log.type == "DAILY_CHECK_IN")
+      .map((log) => ({
+        id: log.id,
+        message: log.message,
+        status: log.status,
+        createdAt: log.createdAt,
+        code: log.redeemed?.code || "",
+      }));
+
+    return { redeemLogs, dailyCheckInLogs };
+  } catch {
+    return { redeemLogs: [], dailyCheckInLogs: [] };
   }
 };
 
