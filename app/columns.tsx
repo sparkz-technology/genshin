@@ -39,7 +39,7 @@ export const REDEEMED_COLUMNS: ColumnDef<LogEntry>[] = [
     header: "Date",
     cell: ({ row }) => {
       const createdAt = row.getValue("createdAt") as string;
-      const formatted = format(new Date(createdAt), "dd/MM/yy HH:mm");
+      const formatted = format(new Date(createdAt), "dd/MM/yy hh:mm a"); 
 
       return <div className="text-xs">{formatted}</div>;
     },
@@ -95,7 +95,7 @@ export const DAILY_CHECK_IN_COLUMNS: ColumnDef<LogEntry>[] = [
     header: "Date",
     cell: ({ row }) => {
       const createdAt = row.getValue("createdAt") as string;
-      const formatted = format(new Date(createdAt), "dd/MM/yy HH:mm");
+      const formatted =  format(new Date(createdAt), "dd/MM/yy hh:mm a"); 
 
       return <div className="text-xs">{formatted}</div>;
     },
