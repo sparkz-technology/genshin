@@ -46,7 +46,7 @@ export async function GET() {
       await client.checkIn(account);
     }
 
-    await logSuccess("Genshin Impact Daily Check-in Completed");
+    // await logSuccess("Genshin Impact Daily Check-in Completed");
     return NextResponse.json({ message: "Genshin Impact Daily Check-in Completed!" });
 
   } catch (error: unknown) {
