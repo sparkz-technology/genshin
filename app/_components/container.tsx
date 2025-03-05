@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DataTable } from "@/app/@components/data-table";
+import { DataTable } from "@/app/_components/data-table";
 import type { LogEntry } from "./types";
 import { Toaster } from "sonner";
 import { useTheme } from "next-themes";
