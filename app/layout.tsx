@@ -20,11 +20,11 @@ export const metadata: Metadata = {
   description: "Track and manage your Genshin Impact redeem codes with ease.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
+interface RootLayoutProps {
   children: React.ReactNode;
-}>) {
+}
+
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased mx-6`}>
@@ -39,3 +39,23 @@ export default function RootLayout({
     </html>
   );
 }
+
+// export default function RootLayout({
+//   children,
+// }: Readonly<{
+//   children: React.ReactNode;
+// }>) {
+//   return (
+//     <html lang="en">
+//       <body className={`${geistSans.variable} ${geistMono.variable} antialiased mx-6`}>
+//         <ThemeProvider attribute="class" defaultTheme="system">
+//           <TooltipProvider>
+//             <main className="min-h-screen">
+//               <SessionProviderClient>{children}</SessionProviderClient>
+//             </main>
+//           </TooltipProvider>
+//         </ThemeProvider>
+//       </body>
+//     </html>
+//   );
+// }
