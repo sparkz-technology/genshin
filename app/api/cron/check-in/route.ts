@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { GameAccount, Reward } from "@/app/components/types";
+import { GameAccount, Reward } from "@/app/@components/types";
 
 export async function GET() {
   try {
