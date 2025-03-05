@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import prisma from "./prisma";
-import type { LogEntry } from "@/app/types";
+import type { LogEntry } from "@/app/_components/types";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 
