@@ -1,5 +1,5 @@
 import { getScreenData } from "@/lib/action";
-import GenshinRedeemContainer from "@/app/@components/container";
+import GenshinRedeemContainer from "@/app/_components/container";
 import { getServerSession } from "next-auth";
 import NextAuth from "@/lib/auth";
 import Header from "@/app/@components/header";
