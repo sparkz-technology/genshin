@@ -2,8 +2,8 @@ import { getScreenData } from "@/lib/action";
 import GenshinRedeemContainer from "@/app/_components/container";
 import { getServerSession } from "next-auth";
 import NextAuth from "@/lib/auth";
-import Header from "@/app/@components/header";
-import InteractiveLanding from "./@components/InteractiveLanding";
+import Header from "@/app/_components/header";
+import InteractiveLanding from "./_components/InteractiveLanding";
 
 export const dynamic = "force-dynamic";
 
