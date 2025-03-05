@@ -1,0 +1,14 @@
+{
+"outputDirectory": "build",
+  "crons": [
+    {
+      "path": "/api/cron/check-in",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/redeem-code",
+      "schedule": "0 0 * * *"
+    }
+  ]
+
+}
