@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { LogEntry } from "@/app/types";
+import type { LogEntry } from "./types";
 import { toast } from "sonner";
 
 export const REDEEMED_COLUMNS: ColumnDef<LogEntry>[] = [
