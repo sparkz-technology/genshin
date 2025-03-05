@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/app/@components/data-table";
-import type { LogEntry } from "@/app/types";
+import type { LogEntry } from "./types";
 import { Toaster } from "sonner";
 import { useTheme } from "next-themes";
 import { DAILY_CHECK_IN_COLUMNS, REDEEMED_COLUMNS } from "./columns";
