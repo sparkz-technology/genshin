@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server"
 
-async function processCodes() {
+async function fetchGenshinCodes() {
   try {
     const apiKey = process.env.GEMINI_API_KEY
 
     if (!apiKey) {
-      console.error("API key not configured")
-      return
+      return { success: false, error: "API key not configured" }
     }
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`
@@ -30,7 +29,7 @@ async function processCodes() {
     })
 
     if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`)
+      return { success: false, error: `API request failed with status ${response.status}` }
     }
 
     const data = await response.json()
@@ -41,35 +40,30 @@ async function processCodes() {
     // Convert AI response into an array
     let codes
     try {
-      // Try to parse the response as JSON
       codes = JSON.parse(aiResponse)
       if (!Array.isArray(codes)) {
-        // If it's not an array, try to extract codes using regex
+        // If it's not an array, extract codes using regex
         const codeMatches = aiResponse.match(/[A-Z0-9]{12}/g)
         codes = codeMatches || []
       }
     } catch {
-      // If parsing fails, check if the response contains codes in a different format
+      // Handle non-JSON formatted responses
       const codeMatches = aiResponse.match(/[A-Z0-9]{12}/g)
       codes = codeMatches || []
     }
 
-    console.log("Fetched codes:", codes)
-    // Here you would typically store or process the codes further
+    return { success: true, codes }
   } catch (error) {
-    console.error("Error in processCodes:", error)
+    return { success: false, error: error.message }
   }
 }
 
 export async function GET() {
-  try {
-    // Start processing codes asynchronously
-    processCodes()
+  const result = await fetchGenshinCodes()
 
-    // Return immediate response
-    return NextResponse.json({ status: 200, message: "Processing codes..." })
-  } catch {
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+  if (!result.success) {
+    return NextResponse.json({ error: result.error }, { status: 500 })
   }
-}
 
+  return NextResponse.json({ status: 200, codes: result.codes })
+}
