@@ -38,7 +38,7 @@ async function fetchGenshinCodes() {
     const aiResponse = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]"
 
     // Convert AI response into an array
-    let codes
+    let codes: string[]
     try {
       codes = JSON.parse(aiResponse)
       if (!Array.isArray(codes)) {
@@ -54,7 +54,7 @@ async function fetchGenshinCodes() {
 
     return { success: true, codes }
   } catch (error) {
-    return { success: false, error: error.message }
+    return { success: false, error: (error as Error).message }
   }
 }
 
