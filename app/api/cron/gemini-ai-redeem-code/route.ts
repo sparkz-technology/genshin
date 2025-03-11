@@ -120,7 +120,8 @@ export async function GET(): Promise<NextResponse<ApiResponse>> {
     let codes: GenshinCode[] = [];
 
     try {
-      // @ts-ignore
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
       const jsonMatch = aiResponse.match(/\[\s*\{.*\}\s*\]/s);
       if (jsonMatch) {
         const parsedData = JSON.parse(jsonMatch[0]);
