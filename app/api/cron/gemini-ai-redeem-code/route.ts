@@ -89,8 +89,8 @@ async function fetchGenshinCodes(): Promise<ApiResponse> {
 
     console.log("AI Raw Response:", aiResponseRaw) // Debugging
 
-    // Extract JSON part only using regex
-    const aiResponse = aiResponseRaw.match(/\[.*\]/s)?.[0] || "[]"
+    // Extract JSON part only using a compatible regex (no /s flag)
+    const aiResponse = aiResponseRaw.match(/\[([\s\S]*)\]/)?.[0] || "[]"
 
     let codes: GenshinCode[] = []
 
