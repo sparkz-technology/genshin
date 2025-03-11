@@ -1,8 +1,28 @@
 import { NextResponse } from "next/server"
 
-async function fetchGenshinCodes() {
+// Define types for the API response
+interface GenshinCode {
+  code: string
+  source: string
+  region?: string
+}
+
+interface ApiResponse {
+  success: boolean
+  codes?: GenshinCode[]
+  error?: string
+  meta?: {
+    fetchedAt: string
+    month: string
+    year: number
+    totalCodes: number
+  }
+}
+
+// Function to fetch Genshin Impact redemption codes
+async function fetchGenshinCodes(): Promise<ApiResponse> {
   try {
-    const apiKey = process.env.GEMINI_API_KEY
+    const apiKey = process.env.GEMINI_API_KEY as string
 
     if (!apiKey) {
       return { success: false, error: "API key not configured" }
@@ -10,42 +30,48 @@ async function fetchGenshinCodes() {
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`
 
-    // Improved prompt that references specific websites and asks for current codes
+    // Generate prompt dynamically
+    const currentMonth = new Date().toLocaleString("default", { month: "long" })
+    const currentYear = new Date().getFullYear()
+
     const prompt = `
-      Find all currently active Genshin Impact redemption codes for the current month.
+      Find all currently active Genshin Impact redemption codes for ${currentMonth} ${currentYear}.
       
-      Check these sources:
-      1. Official Genshin Impact social media (Twitter/X, Facebook)
-      2. HoYoLAB forums
-      3. genshin.hoyoverse.com
-      4. Genshin Impact wiki
-      5. pockettactics.com/genshin-impact/codes
-      6. gamespot.com (Genshin section)
+      Follow these steps:
+      1. Check these official sources:
+         - Official Genshin Impact Twitter (@GenshinImpact)
+         - Official Genshin Impact Facebook page
+         - Official Genshin Impact Discord announcements
+         - HoYoLAB official forums (https://www.hoyolab.com/official/1)
+         - genshin.hoyoverse.com (official website)
       
-      Return ONLY the actual redemption codes as a JSON array of strings.
-      Each code should be exactly 12 characters long and consist of uppercase letters and numbers.
-      If no active codes exist, return an empty array.
+      2. Verify codes on these reliable third-party sources:
+         - Genshin Impact wiki (https://genshin-impact.fandom.com/wiki/Promotional_Code)
+         - pockettactics.com/genshin-impact/codes
+         - gamespot.com (Genshin Impact section)
+         - progameguides.com/genshin-impact/genshin-impact-codes/
       
-      Example response format: ["ABCD1234EFGH", "5678IJKL9012"]
+      3. Ensure the codes:
+         - Are exactly 12 characters (uppercase letters and numbers)
+         - Are not expired
+         - Are valid for this month (${currentMonth} ${currentYear})
+      
+      4. Format response as a JSON array:
+      [
+        {"code": "ABCD1234EFGH", "source": "Official Twitter"},
+        {"code": "5678IJKL9012", "source": "HoYoLAB forums", "region": "Global"}
+      ]
     `
 
     const response = await fetch(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: prompt,
-              },
-            ],
-          },
-        ],
+        contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
-          temperature: 0.2, // Lower temperature for more factual responses
+          temperature: 0.1,
+          topP: 0.8,
+          topK: 40,
         },
       }),
     })
@@ -56,39 +82,38 @@ async function fetchGenshinCodes() {
 
     const data = await response.json()
 
-    // Extract AI response
-    const aiResponse = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]"
+    // Extract AI response safely
+    const aiResponse: string = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]"
 
-    // Enhanced code extraction logic
-    let codes: string[] = []
+    let codes: GenshinCode[] = []
 
-    // First try to parse as JSON
     try {
       const parsedData = JSON.parse(aiResponse)
       if (Array.isArray(parsedData)) {
-        codes = parsedData.filter((code) => typeof code === "string" && /^[A-Z0-9]{12}$/.test(code))
+        codes = parsedData.filter(
+          (item: any): item is GenshinCode =>
+            typeof item === "object" &&
+            typeof item.code === "string" &&
+            /^[A-Z0-9]{12}$/.test(item.code) &&
+            typeof item.source === "string"
+        )
       }
-    } catch {
-      // If JSON parsing fails, extract using regex
+    } catch (error) {
+      console.error("Error parsing AI response:", error)
       const codeMatches = aiResponse.match(/[A-Z0-9]{12}/g)
       if (codeMatches) {
-        // Remove duplicates
-        codes = [...new Set(codeMatches)]
+        codes = [...new Set(codeMatches)].map((code) => ({ code, source: "Unknown" }))
       }
     }
-
-    // Get current date for reference
-    const now = new Date()
-    const currentMonth = now.toLocaleString("default", { month: "long" })
-    const currentYear = now.getFullYear()
 
     return {
       success: true,
       codes,
       meta: {
-        fetchedAt: now.toISOString(),
+        fetchedAt: new Date().toISOString(),
         month: currentMonth,
         year: currentYear,
+        totalCodes: codes.length,
       },
     }
   } catch (error) {
@@ -96,6 +121,7 @@ async function fetchGenshinCodes() {
   }
 }
 
+// Next.js API route handler
 export async function GET() {
   const result = await fetchGenshinCodes()
 
@@ -105,4 +131,3 @@ export async function GET() {
 
   return NextResponse.json(result, { status: 200 })
 }
-
