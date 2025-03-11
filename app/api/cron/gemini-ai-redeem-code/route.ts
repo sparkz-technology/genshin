@@ -22,7 +22,7 @@ interface ApiResponse {
 // Function to fetch Genshin Impact redemption codes
 async function fetchGenshinCodes(): Promise<ApiResponse> {
   try {
-    const apiKey = process.env.GEMINI_API_KEY as string
+    const apiKey = process.env.GEMINI_API_KEY
 
     if (!apiKey) {
       return { success: false, error: "API key not configured" }
@@ -88,11 +88,14 @@ async function fetchGenshinCodes(): Promise<ApiResponse> {
     let codes: GenshinCode[] = []
 
     try {
-      const parsedData = JSON.parse(aiResponse)
+      const parsedData: unknown = JSON.parse(aiResponse)
       if (Array.isArray(parsedData)) {
         codes = parsedData.filter(
-          (item: any): item is GenshinCode =>
+          (item): item is GenshinCode =>
             typeof item === "object" &&
+            item !== null &&
+            "code" in item &&
+            "source" in item &&
             typeof item.code === "string" &&
             /^[A-Z0-9]{12}$/.test(item.code) &&
             typeof item.source === "string"
@@ -100,6 +103,8 @@ async function fetchGenshinCodes(): Promise<ApiResponse> {
       }
     } catch (error) {
       console.error("Error parsing AI response:", error)
+
+      // Fallback to regex extraction if JSON parsing fails
       const codeMatches = aiResponse.match(/[A-Z0-9]{12}/g)
       if (codeMatches) {
         codes = [...new Set(codeMatches)].map((code) => ({ code, source: "Unknown" }))
