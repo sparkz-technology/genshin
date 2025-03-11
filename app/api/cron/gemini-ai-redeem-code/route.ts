@@ -1,38 +1,63 @@
-import { NextResponse } from "next/server"
+import { NextResponse } from 'next/server';
 
-// Define types for the API response
+// Define types for the response data
 interface GenshinCode {
-  code: string
-  source: string
-  region?: string
+  code: string;
+  source: string;
+  region?: string;
 }
 
-interface ApiResponse {
-  success: boolean
-  codes?: GenshinCode[]
-  error?: string
-  meta?: {
-    fetchedAt: string
-    month: string
-    year: number
-    totalCodes: number
-  }
+interface SuccessResponse {
+  success: true;
+  codes: GenshinCode[];
+  meta: {
+    fetchedAt: string;
+    month: string;
+    year: number;
+    totalCodes: number;
+  };
 }
 
-// Function to fetch Genshin Impact redemption codes
-async function fetchGenshinCodes(): Promise<ApiResponse> {
+interface ErrorResponse {
+  success: false;
+  error: string;
+}
+
+type ApiResponse = SuccessResponse | ErrorResponse;
+
+// Define types for the Gemini API response
+interface GeminiResponsePart {
+  text: string;
+}
+
+interface GeminiResponseContent {
+  parts: GeminiResponsePart[];
+}
+
+interface GeminiResponseCandidate {
+  content: GeminiResponseContent;
+}
+
+interface GeminiResponse {
+  candidates?: GeminiResponseCandidate[];
+}
+
+export async function GET(): Promise<NextResponse<ApiResponse>> {
   try {
-    const apiKey = process.env.GEMINI_API_KEY
+    const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
-      return { success: false, error: "API key not configured" }
+      return NextResponse.json({ 
+        success: false, 
+        error: "API key not configured" 
+      } as ErrorResponse);
     }
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
     // Generate prompt dynamically
-    const currentMonth = new Date().toLocaleString("default", { month: "long" })
-    const currentYear = new Date().getFullYear()
+    const currentMonth = new Date().toLocaleString("default", { month: "long" });
+    const currentYear = new Date().getFullYear();
 
     const prompt = `
       Find all currently active Genshin Impact redemption codes for ${currentMonth} ${currentYear}.
@@ -56,14 +81,14 @@ async function fetchGenshinCodes(): Promise<ApiResponse> {
          - Are not expired
          - Are valid for this month (${currentMonth} ${currentYear})
       
-      4. Respond **only** with a valid JSON array. If no codes are available, return an empty array **[]**.
-      
-      Example JSON format:
+      4. Format your response ONLY as a valid JSON array with no additional text:
       [
         {"code": "ABCD1234EFGH", "source": "Official Twitter"},
         {"code": "5678IJKL9012", "source": "HoYoLAB forums", "region": "Global"}
       ]
-    `
+      
+      IMPORTANT: Your response must be ONLY the JSON array with no additional text, explanations, or formatting.
+    `;
 
     const response = await fetch(url, {
       method: "POST",
@@ -76,57 +101,53 @@ async function fetchGenshinCodes(): Promise<ApiResponse> {
           topK: 40,
         },
       }),
-    })
+    });
 
     if (!response.ok) {
-      return { success: false, error: `API request failed with status ${response.status}` }
+      return NextResponse.json({ 
+        success: false, 
+        error: `API request failed with status ${response.status}` 
+      } as ErrorResponse);
     }
 
-    const data = await response.json()
+    const data: GeminiResponse = await response.json();
 
-    // Extract AI response safely
-    const aiResponseRaw: string = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]"
+    const aiResponse = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
-    console.log("AI Raw Response:", aiResponseRaw) // Debugging
+    const codeMatches = aiResponse.match(/[A-Z0-9]{12}/g) || [];
+    const uniqueCodes = [...new Set(codeMatches)];
 
-    // Extract JSON part only using a compatible regex (no /s flag)
-    const aiResponse = aiResponseRaw.match(/\[([\s\S]*)\]/)?.[0] || "[]"
-
-    // 🔹 If AI returns "NONE", handle it properly
-    if (aiResponse.includes('"code": "NONE"')) {
-      return {
-        success: false,
-        error: "AI could not find any valid Genshin Impact codes.",
-      }
-    }
-
-    let codes: GenshinCode[] = []
+    let codes: GenshinCode[] = [];
 
     try {
-      const parsedData: unknown = JSON.parse(aiResponse)
-      if (Array.isArray(parsedData)) {
-        codes = parsedData.filter(
-          (item): item is GenshinCode =>
-            typeof item === "object" &&
-            item !== null &&
-            "code" in item &&
-            "source" in item &&
-            typeof item.code === "string" &&
-            /^[A-Z0-9]{12}$/.test(item.code) &&
-            typeof item.source === "string"
-        )
+      const jsonMatch = aiResponse.match(/\[\s*\{.*\}\s*\]/s);
+      if (jsonMatch) {
+        const parsedData = JSON.parse(jsonMatch[0]);
+        if (Array.isArray(parsedData)) {
+          codes = parsedData.filter(
+            (item): item is GenshinCode =>
+              typeof item === "object" &&
+              item !== null &&
+              "code" in item &&
+              "source" in item &&
+              typeof item.code === "string" &&
+              /^[A-Z0-9]{12}$/.test(item.code) &&
+              typeof item.source === "string"
+          );
+        }
       }
     } catch (error) {
-      console.error("Error parsing AI response:", error)
-
-      // Fallback to regex extraction if JSON parsing fails
-      const codeMatches = aiResponse.match(/[A-Z0-9]{12}/g)
-      if (codeMatches) {
-        codes = [...new Set(codeMatches)].map((code) => ({ code, source: "Unknown" }))
-      }
+      console.error("Error parsing JSON from AI response:", error);
+      // Fallback to just the codes without source info
+      codes = uniqueCodes.map((code) => ({ code, source: "Unknown" }));
     }
 
-    return {
+    // If we couldn't extract structured data but found codes, use them
+    if (codes.length === 0 && uniqueCodes.length > 0) {
+      codes = uniqueCodes.map((code) => ({ code, source: "Unknown" }));
+    }
+
+    const successResponse: SuccessResponse = {
       success: true,
       codes,
       meta: {
@@ -135,19 +156,16 @@ async function fetchGenshinCodes(): Promise<ApiResponse> {
         year: currentYear,
         totalCodes: codes.length,
       },
-    }
+    };
+
+    return NextResponse.json(successResponse);
   } catch (error) {
-    return { success: false, error: (error as Error).message }
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    console.error("API error:", error);
+    
+    return NextResponse.json({ 
+      success: false, 
+      error: errorMessage 
+    } as ErrorResponse);
   }
-}
-
-// Next.js API route handler
-export async function GET() {
-  const result = await fetchGenshinCodes()
-
-  if (!result.success) {
-    return NextResponse.json({ error: result.error }, { status: 500 })
-  }
-
-  return NextResponse.json(result, { status: 200 })
 }
