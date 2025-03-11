@@ -56,8 +56,8 @@ async function fetchGenshinCodes(): Promise<ApiResponse> {
          - Are not expired
          - Are valid for this month (${currentMonth} ${currentYear})
       
-      4. Respond **only** with a valid JSON array. Do not include any explanations or additional text.
-
+      4. Respond **only** with a valid JSON array. If no codes are available, return an empty array **[]**.
+      
       Example JSON format:
       [
         {"code": "ABCD1234EFGH", "source": "Official Twitter"},
@@ -91,6 +91,14 @@ async function fetchGenshinCodes(): Promise<ApiResponse> {
 
     // Extract JSON part only using a compatible regex (no /s flag)
     const aiResponse = aiResponseRaw.match(/\[([\s\S]*)\]/)?.[0] || "[]"
+
+    // 🔹 If AI returns "NONE", handle it properly
+    if (aiResponse.includes('"code": "NONE"')) {
+      return {
+        success: false,
+        error: "AI could not find any valid Genshin Impact codes.",
+      }
+    }
 
     let codes: GenshinCode[] = []
 
