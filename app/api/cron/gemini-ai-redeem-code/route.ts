@@ -75,7 +75,7 @@ async function fetchGenshinCodes(): Promise<ApiResponse> {
         },
       }),
     })
-
+console.log(response)
     if (!response.ok) {
       return { success: false, error: `API request failed with status ${response.status}` }
     }
