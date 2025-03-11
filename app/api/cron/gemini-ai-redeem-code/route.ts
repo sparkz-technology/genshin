@@ -56,7 +56,9 @@ async function fetchGenshinCodes(): Promise<ApiResponse> {
          - Are not expired
          - Are valid for this month (${currentMonth} ${currentYear})
       
-      4. Format response as a JSON array:
+      4. Respond **only** with a valid JSON array. Do not include any explanations or additional text.
+
+      Example JSON format:
       [
         {"code": "ABCD1234EFGH", "source": "Official Twitter"},
         {"code": "5678IJKL9012", "source": "HoYoLAB forums", "region": "Global"}
@@ -75,7 +77,7 @@ async function fetchGenshinCodes(): Promise<ApiResponse> {
         },
       }),
     })
-console.log(response)
+
     if (!response.ok) {
       return { success: false, error: `API request failed with status ${response.status}` }
     }
@@ -83,7 +85,12 @@ console.log(response)
     const data = await response.json()
 
     // Extract AI response safely
-    const aiResponse: string = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]"
+    const aiResponseRaw: string = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]"
+
+    console.log("AI Raw Response:", aiResponseRaw) // Debugging
+
+    // Extract JSON part only using regex
+    const aiResponse = aiResponseRaw.match(/\[.*\]/s)?.[0] || "[]"
 
     let codes: GenshinCode[] = []
 
