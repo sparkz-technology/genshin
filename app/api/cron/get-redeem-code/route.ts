@@ -84,6 +84,7 @@ export async function GET(): Promise<NextResponse> {
     fetchAllGenshinCodes();
     return NextResponse.json({ status: 200, message: "Processing codes..." });
   } catch (error) {
+    console.error("Processing error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
