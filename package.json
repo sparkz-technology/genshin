@@ -11,6 +11,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "chrome-aws-lambda": "^10.1.0",
     "@auth/prisma-adapter": "^2.8.0",
     "@builder.io/partytown": "^0.10.3",
     "@prisma/client": "^6.4.1",
