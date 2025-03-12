@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 interface RedeemCodeWebsite {
-  id: number;
+  id: string;
   url: string;
   selector: string;
 }
