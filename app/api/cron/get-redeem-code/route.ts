@@ -110,7 +110,7 @@ async function fetchAllGenshinCodes(): Promise<void> {
 async function fetchGenshinCodes(url: string, selector: string): Promise<string[]> {
   const browser = await puppeteer.launch({
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    headless: true, // Ensures compatibility with the latest Puppeteer versions
+    headless: !true, // Ensures compatibility with the latest Puppeteer versions
     executablePath: process.env.CHROMIUM_PATH || "/usr/bin/chromium",
   })
 
