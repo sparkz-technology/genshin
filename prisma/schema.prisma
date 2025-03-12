@@ -108,3 +108,10 @@ model log {
   createdAt      DateTime      @default(now())
   redeemedCodeId String?
 }
+
+model RedeemCodeWebsite {
+  id        String @id @default(cuid()) @map("_id")
+  name      String @unique
+  url       String
+  selector  String
+}
