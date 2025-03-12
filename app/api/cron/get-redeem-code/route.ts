@@ -5,11 +5,7 @@ import { NextResponse } from "next/server";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-interface RedeemCodeWebsite {
-  id: string;
-  url: string;
-  selector: string;
-}
+
 
 async function fetchAllGenshinCodes(): Promise<void> {
   const genshinImpactRedeemCodeWebsitesDetails = await prisma.redeemCodeWebsite.findMany();
