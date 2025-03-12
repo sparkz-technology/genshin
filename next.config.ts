@@ -5,6 +5,13 @@ import type { NextConfig } from "next"
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   compress:false,
+   webpack: (config) => {
+    config.module.rules.push({
+      test: /\.js\.map$/,
+      use: 'null-loader',
+    });
+    return config;
+  },
     env: {
     REPLACE_FROM: process.env.REPLACE_FROM,
     REPLACE_TO: process.env.REPLACE_TO,
