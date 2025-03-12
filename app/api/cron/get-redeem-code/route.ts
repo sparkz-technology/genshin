@@ -84,7 +84,8 @@
 //     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
 //   }
 // }
-import puppeteer from "puppeteer"
+import chromium from "chrome-aws-lambda"
+import puppeteerCore from "puppeteer-core"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import prisma from "@/lib/prisma"
 import { NextResponse } from "next/server"
@@ -108,7 +109,15 @@ async function fetchAllGenshinCodes(): Promise<void> {
 }
 
 async function fetchGenshinCodes(url: string, selector: string): Promise<string[]> {
-  const browser = await puppeteer.launch({ headless: true })
+  // Use chrome-aws-lambda for serverless environments
+  const browser = await puppeteerCore.launch({
+    args: chromium.args,
+    defaultViewport: chromium.defaultViewport,
+    executablePath: await chromium.executablePath,
+    headless: true,
+    ignoreHTTPSErrors: true,
+  })
+
   const page = await browser.newPage()
 
   try {
@@ -199,4 +208,6 @@ export async function GET(): Promise<NextResponse> {
     )
   }
 }
+
+
 
