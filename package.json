@@ -11,7 +11,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-        "puppeteer-core": "^24.4.0",
+    "cheerio": "^1.0.0",
     "@auth/prisma-adapter": "^2.8.0",
     "@builder.io/partytown": "^0.10.3",
     "@prisma/client": "^6.4.1",
