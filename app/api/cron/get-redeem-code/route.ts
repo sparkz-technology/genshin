@@ -92,56 +92,64 @@ import { NextResponse } from "next/server"
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 
+/**
+ * Fetch all Genshin Impact redeem codes from various websites and store them in the database.
+ */
 async function fetchAllGenshinCodes(): Promise<void> {
-  const genshinImpactRedeemCodeWebsitesDetails = await prisma.redeemCodeWebsite.findMany()
-  for (const website of genshinImpactRedeemCodeWebsitesDetails) {
-    const codes = await fetchGenshinCodes(website.url, website.selector)
-    await Promise.all(
-      codes.map((code: string) =>
-        prisma.redeemCode.upsert({
-          where: { code: code },
-          update: {},
-          create: { code: code, websiteId: website.id },
-        }),
-      ),
-    )
+  try {
+    const websites = await prisma.redeemCodeWebsite.findMany()
+
+    for (const website of websites) {
+      const codes = await fetchGenshinCodes(website.url, website.selector)
+
+      if (codes.length > 0) {
+        await prisma.redeemCode.createMany({
+          data: codes.map(code => ({
+            code,
+            websiteId: website.id,
+          })),
+          skipDuplicates: true, // Avoid inserting duplicate codes
+        })
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching all Genshin codes:", error)
   }
 }
 
+/**
+ * Fetch Genshin Impact redeem codes from a given website using Puppeteer.
+ */
 async function fetchGenshinCodes(url: string, selector: string): Promise<string[]> {
-  // Use chrome-aws-lambda for serverless environments
-  const browser = await puppeteerCore.launch({
-    args: chromium.args,
-    defaultViewport: chromium.defaultViewport,
-    executablePath: await chromium.executablePath,
-    headless: true,
-    ignoreHTTPSErrors: true,
-  })
-
-  const page = await browser.newPage()
-
+  let browser
   try {
-    await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 })
-
-    await page.evaluate(() => {
-      window.scrollBy(0, document.body.scrollHeight)
+    browser = await puppeteerCore.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath || "/usr/bin/chromium",
+      headless: true,
+      ignoreHTTPSErrors: true,
     })
 
+    const page = await browser.newPage()
+    await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 })
+
+    await page.evaluate(() => window.scrollBy(0, document.body.scrollHeight))
     await page.waitForSelector(selector, { timeout: 30000 })
 
     const pageText = await page.evaluate(() => document.body.innerText)
-
-    const codes = await getCodesFromGemini(pageText)
-
-    await browser.close()
-    return codes
+    return await getCodesFromGemini(pageText)
   } catch (error) {
     console.error(`Error fetching codes from ${url}:`, error)
-    await browser.close()
     return []
+  } finally {
+    if (browser) await browser.close() // Ensures browser is always closed
   }
 }
 
+/**
+ * Extract redeem codes from text using Gemini AI.
+ */
 async function getCodesFromGemini(text: string): Promise<string[]> {
   try {
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY as string)
@@ -156,39 +164,33 @@ async function getCodesFromGemini(text: string): Promise<string[]> {
     const result = await model.generateContent(prompt)
     const responseText = await result.response.text()
 
+    // Extract valid JSON array from response
     const match = responseText.match(/\[.*?\]/s)
-    if (match) {
-      return JSON.parse(match[0]) as string[]
-    }
-
-    return []
+    return match ? JSON.parse(match[0]) : []
   } catch (error) {
     console.error("Gemini AI processing error:", error)
     return []
   }
 }
 
+/**
+ * Retrieve stored redeem codes from the database.
+ */
 async function getStoredCodes() {
   try {
-    // Fetch all codes from the database
-    const codes = await prisma.redeemCode.findMany({
-      include: {
-        website: true, // Include the website information if needed
-      },
-    })
-    return codes
+    return await prisma.redeemCode.findMany({ include: { website: true } })
   } catch (error) {
     console.error("Error fetching codes from database:", error)
     throw error
   }
 }
 
+/**
+ * API route handler for GET requests.
+ */
 export async function GET(): Promise<NextResponse> {
   try {
-    // First, fetch and process new codes
     await fetchAllGenshinCodes()
-
-    // Then, get all codes from the database to return
     const savedCodes = await getStoredCodes()
 
     return NextResponse.json({
@@ -208,6 +210,3 @@ export async function GET(): Promise<NextResponse> {
     )
   }
 }
-
-
-
