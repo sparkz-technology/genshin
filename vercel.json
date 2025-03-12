@@ -4,6 +4,9 @@
       "includeFiles": ["node_modules/chrome-aws-lambda/**"]
     }
   },
+     "env": {
+    "CHROME_EXECUTABLE_PATH": "/usr/bin/chromium"
+  },
 "outputDirectory": "build",
   "crons": [
     {
