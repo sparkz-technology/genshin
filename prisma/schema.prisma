@@ -96,6 +96,13 @@ model redeemedCode {
   createdAt DateTime @default(now())
   log       log[]
 }
+model redeemCode {
+  websiteId    String   @map("websiteId")
+  website      RedeemCodeWebsite     @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid()) @map("_id")
+  code      String   @unique
+  createdAt DateTime @default(now())
+}
 
 model log {
   userId         String        @map("userId")
