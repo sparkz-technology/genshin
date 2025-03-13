@@ -6,31 +6,29 @@ import type { LogEntry } from "@/app/_components/types";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 
-async function fetchActiveCodes(userId: string): Promise<string[]> {
+async function fetchActiveCodes(userId: string): Promise<boolean> {
   try {
     if (!userId) {
-      return [];
+      return false
     }
-    const response = await fetch("https://genshin-impact.fandom.com/wiki/Promotional_Code");
-    const text = await response.text();
-
-    const codes = [...text.matchAll(/<code>(.*?)<\/code>/g)].map((match) => match[1]);
-
-    const uniqueCodes = [...new Set(codes)];
+    const redeemCodes = await prisma.redeemCode.findMany({
+      where: { createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } },
+      select: { code: true }
+    });
 
     await Promise.all(
-      uniqueCodes.map((code) =>
+      redeemCodes.map((item) =>
         prisma.redeemedCode.upsert({
-          where: { code: code }, // Check if the code exists
+          where: { code: item.code }, // Check if the code exists
           update: {}, // Keep existing records unchanged
-          create: { code, status: "NOT_REDEEMED", userId: userId }, // Create new records
+          create: { code: item.code, status: "NOT_REDEEMED", userId: userId }, // Create new records
         })
       )
     );
 
-    return uniqueCodes;
+    return true;
   } catch {
-    return [];
+    return false;
   }
 }
 
@@ -210,7 +208,7 @@ export const getLogs = async (userId: string) => {
   try {
     const logs = await prisma.log.findMany({
       where: { userId: userId },
-      orderBy: { createdAt: "desc",  },
+      orderBy: { createdAt: "desc", },
       select: {
         id: true,
         message: true,
