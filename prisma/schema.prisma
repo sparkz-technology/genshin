@@ -19,13 +19,15 @@ model Account {
   type              String
   provider          String
   providerAccountId String  @map("provider_account_id")
-  refreshToken      String? @map("refresh_token")
-  accessToken       String? @map("access_token")
-  expiresAt         Int?    @map("expires_at")
-  tokenType         String? @map("token_type")
+  refresh_token     String? // Changed from refreshToken to refresh_token
+  access_token      String? // Changed from accessToken to access_token
+  expires_at        Int?    // Changed from expiresAt to expires_at
+  token_type        String? // Changed from tokenType to token_type
   scope             String?
-  idToken           String? @map("id_token")
-  sessionState      String? @map("session_state")
+  id_token          String? // Changed from idToken to id_token
+  session_state     String? // Changed from sessionState to session_state
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -33,6 +35,7 @@ model Account {
   @@map("accounts")
   @@index([userId])
 }
+
 
 model Session {
   id           String   @id @default(cuid()) @map("_id")

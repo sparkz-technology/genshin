@@ -9,11 +9,11 @@ import { getServerSession } from "next-auth";
 async function fetchActiveCodes(userId: string): Promise<boolean> {
   try {
     if (!userId) {
-      return false
+      return false;
     }
     const redeemCodes = await prisma.redeemCode.findMany({
       where: { createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } },
-      select: { code: true }
+      select: { code: true },
     });
 
     await Promise.all(
@@ -57,6 +57,7 @@ async function redeemCode(cdkey: string, userId: string): Promise<boolean> {
     if (!settings) {
       return false;
     }
+    console.log(settings);
     const baseUrl = "https://public-operation-hk4e.hoyoverse.com/common/apicdkey/api/webExchangeCdkey";
     const queryParams = new URLSearchParams({
       uid: settings.uid,
@@ -68,9 +69,9 @@ async function redeemCode(cdkey: string, userId: string): Promise<boolean> {
     });
 
     const cookies = [
-      `cookie_token_v2=${settings.cookieTokenV2}`,
-      `account_mid_v2=${settings.accountMidV2}`,
-      `account_id_v2=${settings.accountIdV2}`,
+      `cookie_token_v2=${settings.cookieTokenV2.trim()}`,
+      `account_mid_v2=${settings.accountMidV2.trim()}`,
+      `account_id_v2=${settings.accountIdV2.trim()}`,
     ].join("; ");
 
     const response = await fetch(`${baseUrl}?${queryParams.toString()}`, {
@@ -118,16 +119,22 @@ async function redeemCode(cdkey: string, userId: string): Promise<boolean> {
   }
 }
 
+function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export async function processCodes() {
   const users = await prisma.user.findMany();
   for (const user of users) {
     await fetchActiveCodes(user.id);
     const redeemedCodes = await getRedeemedCodes(user.id);
     for (const code of redeemedCodes) {
+      await delay(5 * 60 * 1000); // 5-minute delay
       await redeemCode(code, user.id);
     }
   }
 }
+
 
 export const updateSettings = async (setting: {
   uid: string;
@@ -140,7 +147,8 @@ export const updateSettings = async (setting: {
   act_id: string;
 }) => {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
+
     if (!session?.user?.id) {
       return false;
     }
@@ -192,8 +200,8 @@ const defaultSettings = {
 };
 export const getSettings = async (userId: string) => {
   try {
-    const settings = await prisma.settings.findFirst({ where: { userId: userId } });
-
+    const settings = await prisma.settings.findFirst({ where: { userId } });
+    console.log(settings);
     if (!settings) {
       return defaultSettings;
     }
@@ -208,7 +216,7 @@ export const getLogs = async (userId: string) => {
   try {
     const logs = await prisma.log.findMany({
       where: { userId: userId },
-      orderBy: { createdAt: "desc", },
+      orderBy: { createdAt: "desc" },
       select: {
         id: true,
         message: true,

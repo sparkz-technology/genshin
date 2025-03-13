@@ -31,11 +31,11 @@ export async function GET() {
         }
 
         const cookies = [
-          `cookie_token_v2=${settings.cookieTokenV2}`,
-          `account_mid_v2=${settings.accountMidV2}`,
-          `account_id_v2=${settings.accountIdV2}`,
-          `ltoken_v2=${settings.ltokenV2}`,
-          `ltuid_v2=${settings.ltuidV2}`,
+          `cookie_token_v2=${settings.cookieTokenV2.trim()}`,
+          `account_mid_v2=${settings.accountMidV2.trim()}`,
+          `account_id_v2=${settings.accountIdV2.trim()}`,
+          `ltoken_v2=${settings.ltokenV2.trim()}`,
+          `ltuid_v2=${settings.ltuidV2.trim()}`,
         ].join("; ");
 
         const client = new HoyolabClient(cookies, settings.actId);
