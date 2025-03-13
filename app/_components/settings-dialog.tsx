@@ -502,7 +502,8 @@ const SettingsDialog: React.FC<ISettingsDialog> = ({ data, hidden }) => {
             description: "Unable to save settings. Please try again.",
           })
         }
-      } catch (error) {
+              resetForm()
+      } catch  {
         toast.message("Save Failed", {
           description: "An error occurred while saving settings. Please try again.",
         })
