@@ -55,8 +55,8 @@ model User {
   role          String         @default("USER")
   accounts      Account[]
   sessions      Session[]
-  settings      UserSettings?
-  redeemedCodes RedeemCode[]
+  settings      Settings[]
+  redeemedCodes RedeemedCode[]
   logs          Log[]
 
   @@map("users")
@@ -72,9 +72,9 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
-model UserSettings {
+model Settings {
   id              String   @id @default(cuid()) @map("_id")
-  userId          String   @unique @map("user_id")
+  userId          String   @map("user_id")
   uid             String   @unique
   region          String
   lang            String
@@ -90,53 +90,62 @@ model UserSettings {
   updatedAt       DateTime @updatedAt
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("user_settings")
+  @@map("settings")
+  @@index([userId])
 }
 
-model RedeemCode {
-  id          String    @id @default(cuid()) @map("_id")
-  code        String    @unique
-  status      String    @default("NOT_REDEEMED")
-  websiteId   String?   @map("website_id")
-  userId      String?   @map("user_id")
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  redeemedAt  DateTime?
-  website     RedeemCodeWebsite? @relation(fields: [websiteId], references: [id])
-  user        User?     @relation(fields: [userId], references: [id])
-  logs        Log[]
+model RedeemedCode {
+  id        String   @id @default(cuid()) @map("_id")
+  userId    String   @map("user_id")
+  code      String   @unique
+  status    String   @default("NOT_REDEEMED")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs      Log[]
 
-  @@index([status])
-  @@index([websiteId])
+  @@map("redeemed_codes")
   @@index([userId])
-  @@map("redeem_codes")
+  @@index([status])
 }
 
 model Log {
-  id             String     @id @default(cuid()) @map("_id")
-  userId         String     @map("user_id")
-  type           String     @default("REDEEMED")
-  redeemCodeId   String?    @map("redeem_code_id")
+  id             String        @id @default(cuid()) @map("_id")
+  userId         String        @map("user_id")
+  type           String        @default("REDEEMED")
+  redeemedCodeId String?       @map("redeemed_code_id")
   message        String
   status         String
-  createdAt      DateTime   @default(now())
-  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  redeemCode     RedeemCode? @relation(fields: [redeemCodeId], references: [id])
+  createdAt      DateTime      @default(now())
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  redeemed       RedeemedCode? @relation(fields: [redeemedCodeId], references: [id])
 
+  @@map("logs")
   @@index([userId])
   @@index([type])
-  @@index([redeemCodeId])
-  @@map("logs")
+  @@index([redeemedCodeId])
 }
 
 model RedeemCodeWebsite {
-  id          String      @id @default(cuid()) @map("_id")
-  name        String      @unique
+  id          String       @id @default(cuid()) @map("_id")
+  name        String       @unique
   url         String
   selector    String
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   redeemCodes RedeemCode[]
 
   @@map("redeem_code_websites")
+}
+
+model RedeemCode {
+  id        String            @id @default(cuid()) @map("_id")
+  websiteId String            @map("website_id")
+  code      String            @unique
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  website   RedeemCodeWebsite @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+
+  @@map("redeem_codes")
+  @@index([websiteId])
 }
