@@ -17,12 +17,12 @@ export async function GET() {
     for (const settings of settingsArray) {
       try {
         if (
-          !settings.cookie_token_v2 ||
-          !settings.account_mid_v2 ||
-          !settings.account_id_v2 ||
-          !settings.ltoken_v2 ||
-          !settings.ltuid_v2 ||
-          !settings.act_id
+          !settings.cookieTokenV2 ||
+          !settings.accountMidV2 ||
+          !settings.accountIdV2 ||
+          !settings.ltokenV2 ||
+          !settings.ltuidV2 ||
+          !settings.actId
         ) {
           const errorMsg = `Missing required settings`;
           await logError(errorMsg, settings.userId);
@@ -31,14 +31,14 @@ export async function GET() {
         }
 
         const cookies = [
-          `cookie_token_v2=${settings.cookie_token_v2}`,
-          `account_mid_v2=${settings.account_mid_v2}`,
-          `account_id_v2=${settings.account_id_v2}`,
-          `ltoken_v2=${settings.ltoken_v2}`,
-          `ltuid_v2=${settings.ltuid_v2}`,
+          `cookie_token_v2=${settings.cookieTokenV2}`,
+          `account_mid_v2=${settings.accountMidV2}`,
+          `account_id_v2=${settings.accountIdV2}`,
+          `ltoken_v2=${settings.ltokenV2}`,
+          `ltuid_v2=${settings.ltuidV2}`,
         ].join("; ");
 
-        const client = new HoyolabClient(cookies, settings.act_id);
+        const client = new HoyolabClient(cookies, settings.actId);
 
         const isValid = await client.verifyCookie();
         if (!isValid) {
