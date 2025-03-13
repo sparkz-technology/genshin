@@ -65,14 +65,14 @@ async function redeemCode(cdkey: string, userId: string): Promise<boolean> {
       region: settings.region,
       lang: settings.lang,
       cdkey: cdkey,
-      game_biz: settings.game_biz,
+      game_biz: settings.gameBiz,
       sLangKey: settings.sLangKey,
     });
 
     const cookies = [
-      `cookie_token_v2=${settings.cookie_token_v2}`,
-      `account_mid_v2=${settings.account_mid_v2}`,
-      `account_id_v2=${settings.account_id_v2}`,
+      `cookie_token_v2=${settings.cookieTokenV2}`,
+      `account_mid_v2=${settings.accountMidV2}`,
+      `account_id_v2=${settings.accountIdV2}`,
     ].join("; ");
 
     const response = await fetch(`${baseUrl}?${queryParams.toString()}`, {
@@ -149,27 +149,27 @@ export const updateSettings = async (setting: {
     await prisma.settings.upsert({
       where: { uid: setting.uid, userId: session.user.id },
       update: {
-        ltuid_v2: setting.ltuid_v2,
-        ltoken_v2: setting.ltoken_v2,
-        cookie_token_v2: setting.cookie_token_v2,
-        account_mid_v2: setting.account_mid_v2,
-        account_id_v2: setting.account_id_v2,
-        game_biz: setting.game_biz,
-        act_id: setting.act_id,
+        ltuidV2: setting.ltuid_v2,
+        ltokenV2: setting.ltoken_v2,
+        cookieTokenV2: setting.cookie_token_v2,
+        accountMidV2: setting.account_mid_v2,
+        accountIdV2: setting.account_id_v2,
+        gameBiz: setting.game_biz,
+        actId: setting.act_id,
       },
       create: {
         userId: session.user.id,
         uid: setting.uid,
         region: "os_asia",
         lang: "en",
-        game_biz: setting.game_biz,
+        gameBiz: setting.game_biz,
         sLangKey: "en-us",
-        ltuid_v2: setting.ltuid_v2,
-        ltoken_v2: setting.ltoken_v2,
-        act_id: setting.act_id,
-        cookie_token_v2: setting.cookie_token_v2,
-        account_mid_v2: setting.account_mid_v2,
-        account_id_v2: setting.account_id_v2,
+        ltuidV2: setting.ltuid_v2,
+        ltokenV2: setting.ltoken_v2,
+        actId: setting.act_id,
+        cookieTokenV2: setting.cookie_token_v2,
+        accountMidV2: setting.account_mid_v2,
+        accountIdV2: setting.account_id_v2,
       },
     });
     revalidatePath("/");
