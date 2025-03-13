@@ -183,14 +183,14 @@ const defaultSettings = {
   uid: "",
   region: "",
   lang: "en",
-  game_biz: "",
+  gameBiz: "",
   sLangKey: "",
-  cookie_token_v2: "",
-  account_mid_v2: "",
-  account_id_v2: "",
-  ltoken_v2: "",
-  ltuid_v2: "",
-  act_id: "",
+  cookieTokenV2: "",
+  accountMidV2: "",
+  accountIdV2: "",
+  ltokenV2: "",
+  ltuidV2: "",
+  actId: "",
 };
 export const getSettings = async (userId: string) => {
   try {

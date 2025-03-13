@@ -13,20 +13,6 @@ interface GenshinRedeemContainerProps {
       redeemLogs: LogEntry[];
       dailyCheckInLogs: LogEntry[];
     };
-    settings: {
-      id: string;
-      uid: string;
-      region: string;
-      lang: string;
-      game_biz: string;
-      sLangKey: string;
-      cookie_token_v2: string;
-      account_mid_v2: string;
-      account_id_v2: string;
-      ltoken_v2: string;
-      ltuid_v2: string;
-      act_id: string;
-    };
   };
 }
 

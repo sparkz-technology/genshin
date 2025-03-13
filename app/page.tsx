@@ -17,7 +17,20 @@ export default async function GenshinRedeemPage() {
   return (
       <div className="container mx-auto py-10">
         <InteractiveLanding/>
-        <Header data={data} session={session} />
+        <Header data={data ? { settings: { 
+          id: data.settings.id, 
+          uid: data.settings.uid, 
+          region: data.settings.region, 
+          lang: data.settings.lang, 
+          game_biz: data.settings.gameBiz, 
+          sLangKey: data.settings.sLangKey, 
+          cookie_token_v2: data.settings.cookieTokenV2, 
+          account_mid_v2: data.settings.accountMidV2, 
+          account_id_v2: data.settings.accountIdV2, 
+          ltoken_v2: data.settings.ltokenV2, 
+          ltuid_v2: data.settings.ltuidV2, 
+          act_id: data.settings.actId 
+        }} : null} session={session} />
         {!!session && data && <GenshinRedeemContainer data={data} />}
       </div>
   );
