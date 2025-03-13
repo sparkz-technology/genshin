@@ -23,6 +23,7 @@ jobs:
           else
             echo "✅ VERCEL_URL is set to: '$VERCEL_URL'"
           fi
+
       - name: Call /api/cron/check-in
         run: |
           curl -X GET "$VERCEL_URL/api/cron/check-in"
@@ -43,6 +44,11 @@ jobs:
           else
             echo "✅ VERCEL_URL is set to: '$VERCEL_URL'"
           fi
+
+      - name: Call /api/cron/get-redeem-code
+        run: |
+          curl -X GET "$VERCEL_URL/api/cron/get-redeem-code"
+
       - name: Call /api/cron/redeem-code
         run: |
           curl -X GET "$VERCEL_URL/api/cron/redeem-code"
