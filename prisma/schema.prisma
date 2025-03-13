@@ -19,18 +19,19 @@ model Account {
   type              String
   provider          String
   providerAccountId String  @map("provider_account_id")
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
+  refreshToken      String? @map("refresh_token")
+  accessToken       String? @map("access_token")
+  expiresAt         Int?    @map("expires_at")
+  tokenType         String? @map("token_type")
   scope             String?
-  id_token          String?
-  session_state     String?
+  idToken           String? @map("id_token")
+  sessionState      String? @map("session_state")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
+  @@index([userId])
 }
 
 model Session {
@@ -41,6 +42,7 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("sessions")
+  @@index([userId])
 }
 
 model User {
@@ -53,9 +55,9 @@ model User {
   role          String         @default("USER")
   accounts      Account[]
   sessions      Session[]
-  settings      settings[]
-  redeemedCode  redeemedCode[]
-  log           log[]
+  settings      UserSettings?
+  redeemedCodes RedeemCode[]
+  logs          Log[]
 
   @@map("users")
 }
@@ -70,58 +72,71 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
-model settings {
-  userId          String @map("userId")
-  user            User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  id              String @id @default(cuid()) @map("_id")
-  uid             String @unique
+model UserSettings {
+  id              String   @id @default(cuid()) @map("_id")
+  userId          String   @unique @map("user_id")
+  uid             String   @unique
   region          String
   lang            String
-  game_biz        String
+  gameBiz         String   @map("game_biz")
   sLangKey        String
-  cookie_token_v2 String
-  account_mid_v2  String
-  account_id_v2   String
-  ltuid_v2        String
-  ltoken_v2       String
-  act_id          String
+  cookieTokenV2   String   @map("cookie_token_v2")
+  accountMidV2    String   @map("account_mid_v2")
+  accountIdV2     String   @map("account_id_v2")
+  ltuidV2         String   @map("ltuid_v2")
+  ltokenV2        String   @map("ltoken_v2")
+  actId           String   @map("act_id")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
 }
 
-model redeemedCode {
-  userId    String   @map("userId")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  id        String   @id @default(cuid()) @map("_id")
-  code      String   @unique
-  status    String   @default("NOT_REDEEMED")
-  createdAt DateTime @default(now())
-  log       log[]
+model RedeemCode {
+  id          String    @id @default(cuid()) @map("_id")
+  code        String    @unique
+  status      String    @default("NOT_REDEEMED")
+  websiteId   String?   @map("website_id")
+  userId      String?   @map("user_id")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  redeemedAt  DateTime?
+  website     RedeemCodeWebsite? @relation(fields: [websiteId], references: [id])
+  user        User?     @relation(fields: [userId], references: [id])
+  logs        Log[]
+
+  @@index([status])
+  @@index([websiteId])
+  @@index([userId])
+  @@map("redeem_codes")
 }
 
-
-model log {
-  userId         String        @map("userId")
-  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  id             String        @id @default(cuid()) @map("_id")
-  type           String        @default("REDEEMED")
-  redeemed       redeemedCode? @relation(fields: [redeemedCodeId], references: [id])
+model Log {
+  id             String     @id @default(cuid()) @map("_id")
+  userId         String     @map("user_id")
+  type           String     @default("REDEEMED")
+  redeemCodeId   String?    @map("redeem_code_id")
   message        String
   status         String
-  createdAt      DateTime      @default(now())
-  redeemedCodeId String?
+  createdAt      DateTime   @default(now())
+  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  redeemCode     RedeemCode? @relation(fields: [redeemCodeId], references: [id])
+
+  @@index([userId])
+  @@index([type])
+  @@index([redeemCodeId])
+  @@map("logs")
 }
 
 model RedeemCodeWebsite {
-  id        String       @id @default(cuid()) @map("_id")
-  name      String       @unique
-  url       String
-  selector  String
-  redeemCodes redeemCode[] // Add this line to create the relation
-}
+  id          String      @id @default(cuid()) @map("_id")
+  name        String      @unique
+  url         String
+  selector    String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  redeemCodes RedeemCode[]
 
-model redeemCode {
-  websiteId    String   @map("websiteId")
-  website      RedeemCodeWebsite @relation(fields: [websiteId], references: [id], onDelete: Cascade)
-  id        String   @id @default(cuid()) @map("_id")
-  code      String   @unique
-  createdAt DateTime @default(now())
+  @@map("redeem_code_websites")
 }
