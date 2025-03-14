@@ -2,8 +2,9 @@ name: Run Cron Jobs
 
 on:
   schedule:
-    - cron: '0 5 * * *'  # Runs at 5:00 AM UTC (for check-in)
-    - cron: '0 0 * * *'  # Runs at midnight UTC (for redeem-code)
+    - cron: '0 5 * * *'   # Runs at 5:00 AM UTC (for check-in)
+    - cron: '0 0 * * *'   # Runs at midnight UTC (for redeem-code)
+    - cron: '*/10 * * * *'  # Runs every 10 minutes (for redeem-code)
   workflow_dispatch:  # Allows manual execution
 
 jobs:
@@ -28,7 +29,7 @@ jobs:
         run: |
           curl -X GET "$VERCEL_URL/api/cron/check-in"
 
-  redeem-code:
+  get-redeem-code:
     if: github.event.schedule == '0 0 * * *'  # Only runs at 12 AM UTC
     runs-on: ubuntu-latest
 
@@ -48,6 +49,23 @@ jobs:
       - name: Call /api/cron/get-redeem-code
         run: |
           curl -X GET "$VERCEL_URL/api/cron/get-redeem-code"
+
+  redeem-code:
+    if: github.event.schedule == '*/10 * * * *'  # Runs every 10 minutes
+    runs-on: ubuntu-latest
+
+    env:
+      VERCEL_URL: ${{ secrets.VERCEL_URL }}
+
+    steps:
+      - name: Debug VERCEL_URL
+        run: |
+          if [ -z "$VERCEL_URL" ]; then
+            echo "❌ ERROR: VERCEL_URL is empty!"
+            exit 1
+          else
+            echo "✅ VERCEL_URL is set to: '$VERCEL_URL'"
+          fi
 
       - name: Call /api/cron/redeem-code
         run: |

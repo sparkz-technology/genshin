@@ -119,21 +119,21 @@ async function redeemCode(cdkey: string, userId: string): Promise<boolean> {
   }
 }
 
-function delay(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 export async function processCodes() {
   const users = await prisma.user.findMany();
+  
   for (const user of users) {
     await fetchActiveCodes(user.id);
     const redeemedCodes = await getRedeemedCodes(user.id);
-    for (const code of redeemedCodes) {
-      await delay(5 * 60 * 1000); // 5-minute delay
-      await redeemCode(code, user.id);
+    if (redeemedCodes.size > 0) {
+      const code = redeemedCodes.values().next().value;
+      if (code) {
+        await redeemCode(code, user.id);
+      }
     }
   }
 }
+
 
 
 export const updateSettings = async (setting: {
