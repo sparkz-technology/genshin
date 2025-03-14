@@ -95,7 +95,7 @@ async function redeemCode(cdkey: string, userId: string): Promise<boolean> {
       const data = await prisma.redeemedCode.update({ where: { code: cdkey }, data: { status: "REDEEMED" } });
       await prisma.log.create({
         data: {
-          message: `Successfully redeemed `,
+          message: `${apiData?.message || "Successfully redeemed"}`,
           status: "REDEEMED",
           redeemedCodeId: data.id,
           userId: userId,
