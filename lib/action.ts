@@ -121,9 +121,9 @@ async function redeemCode(cdkey: string, userId: string): Promise<boolean> {
 
 export async function processCodes() {
   const users = await prisma.user.findMany();
-  
+
   for (const user of users) {
-   fetchActiveCodes(user.id);
+    await fetchActiveCodes(user.id);
     const redeemedCodes = await getRedeemedCodes(user.id);
     console.log(redeemedCodes, user.id);
     if (redeemedCodes.size > 0) {
