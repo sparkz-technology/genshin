@@ -123,7 +123,7 @@ export async function processCodes() {
   const users = await prisma.user.findMany();
   
   for (const user of users) {
-    await fetchActiveCodes(user.id);
+   fetchActiveCodes(user.id);
     const redeemedCodes = await getRedeemedCodes(user.id);
     if (redeemedCodes.size > 0) {
       const code = redeemedCodes.values().next().value;
