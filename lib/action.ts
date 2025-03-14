@@ -125,6 +125,7 @@ export async function processCodes() {
   for (const user of users) {
    fetchActiveCodes(user.id);
     const redeemedCodes = await getRedeemedCodes(user.id);
+    console.log(redeemedCodes, user.id);
     if (redeemedCodes.size > 0) {
       const code = redeemedCodes.values().next().value;
       if (code) {
